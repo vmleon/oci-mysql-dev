@@ -1,0 +1,8 @@
+[mysql_proxy]
+%{ for index, hostname in mysql_proxy_hostnames ~}
+${hostname} ansible_host=${mysql_proxy_public_ips[index]}
+%{ endfor ~}
+
+[mysql_proxy:vars]
+ansible_user=opc
+ansible_private_key_file=~/.ssh/id_rsa
