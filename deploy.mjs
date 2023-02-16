@@ -4,12 +4,19 @@ const shell = process.env.SHELL | "/bin/zsh";
 $.shell = shell;
 $.verbose = false;
 
-const { c, _ } = argv;
+const { c, o, _ } = argv;
 const [action] = _;
 
 if (c || action === "clean") {
   await cd("./terraform");
   await cleanInfra();
+  await cd("../");
+  process.exit(0);
+}
+
+if (o || action === "output") {
+  await cd("./terraform");
+  await terraformOutput();
   await cd("../");
   process.exit(0);
 }
@@ -120,7 +127,10 @@ async function terraformOutput() {
     if (commandOutput.exitCode !== 0) {
       console.log(chalk.red(commandOutput.stderr.trim()));
     }
-    const command = commandOutput.stdout.trim();
+    const command = commandOutput.stdout
+      .trim()
+      .replace("-i <privateKey> ", "")
+      .replace("<localPort>", "3306");
     console.log(`SSH Bastion command: ${chalk.yellow(command)}`);
   } catch (error) {
     console.error(chalk.red(error.toString().trim()));
